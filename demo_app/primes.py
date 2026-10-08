@@ -18,3 +18,7 @@ def is_prime(n: int) -> bool:
 
 def primes_below(limit: int) -> list[int]:
     return [n for n in range(limit) if is_prime(n)]
+
+
+def count_primes_below(limit: int) -> int:
+    return len(primes_below(limit))
