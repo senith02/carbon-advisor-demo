@@ -43,8 +43,7 @@ jobs:
       - id: advisor
         uses: senith02/Artifact/Research_Artifact/code/github-action@7c19b9c319d807135d10f38ddf7df8c3f259bc3e
         with:
-          compute-region: GB
-          scenario: gb-hypothetical
+          scenario: gb-hypothetical   # compute-region deliberately removed (fail-safe demo)
 
   build:
     runs-on: ubuntu-24.04
