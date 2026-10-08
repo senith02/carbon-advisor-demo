@@ -1,0 +1,61 @@
+# CI for the carbon-advisor demo (research P4-T2; DL-033 R3-K; DL-036).
+#
+# Two advisory jobs run beside the build and only publish a recommendation;
+# neither can block, cancel or fail it.
+#   - advisor-real:        the real location — a GitHub-hosted runner, declared
+#                          GITHUB-HOSTED (not GB) -> RUN NOW (fail-safe).
+#   - advisor-gb-scenario: labelled SCENARIO — what the advisor would recommend
+#                          if this build ran on GB compute.
+# The build runs a SYNTHETIC ~9-minute workload (scripts/synthetic_workload.py).
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  advisor-real:
+    name: advisor (real location, GitHub-hosted)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github
+          persist-credentials: false
+      - id: advisor
+        uses: senith02/Artifact/Research_Artifact/code/github-action@7c19b9c319d807135d10f38ddf7df8c3f259bc3e
+        with:
+          compute-region: GITHUB-HOSTED
+          config: .github/carbon-advisor.hosted.yml
+
+  advisor-gb-scenario:
+    name: advisor (GB scenario)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github
+          persist-credentials: false
+      - id: advisor
+        uses: senith02/Artifact/Research_Artifact/code/github-action@7c19b9c319d807135d10f38ddf7df8c3f259bc3e
+        with:
+          compute-region: GB
+          scenario: gb-hypothetical
+
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -t .
+      - name: Synthetic workload (stands in for a longer test suite)
+        run: python -m scripts.synthetic_workload --seconds 540
