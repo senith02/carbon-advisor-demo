@@ -1,0 +1,7 @@
+# Team config for the real-location advisory job (research DL-036 §1).
+# The job runs on a GitHub-hosted runner, whose region a workflow can neither
+# choose nor verify. It is declared as what is known — GITHUB-HOSTED, not GB —
+# so the advisor answers RUN NOW (fail-safe: region_not_gb) and shows no GB
+# carbon figures.
+compute_region: GITHUB-HOSTED
+enabled_workflows: [ci.yml]
