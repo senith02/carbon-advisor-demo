@@ -1,4 +1,4 @@
-"""Prime numbers, by trial division."""
+"""Prime numbers, by trial division (odd divisors only)."""
 
 from __future__ import annotations
 
