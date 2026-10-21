@@ -1,13 +1,9 @@
-# Repo What-If Report for this repository (research DL-033 R3-I; DL-037 §7).
+# Repo What-If Report for this repository (research DL-033 R3-I; DL-037 §7; DL-038 §5).
 #
 # Replays this repository's completed runs of one workflow through the advisor and
 # shows what it would have recommended on GB compute (labelled SCENARIO). The report
-# appears in this run's Summary; the full report (report.html, report.md,
-# report.json) is uploaded as the artifact `carbon-whatif-report`.
-# Demonstration only, never research evidence.
-#
-# Runs when started from the Actions tab (Run workflow), and once automatically
-# when this file is pushed to main.
+# appears in this run's Summary and is uploaded as a workflow artifact
+# (report.html, report.md, report.json). Demonstration only, never research evidence.
 name: carbon-whatif
 
 on:
@@ -17,46 +13,15 @@ on:
         description: Workflow file to replay (e.g. ci.yml)
         required: true
         default: ci.yml
-  push:
-    branches: [main]
-    paths: [.github/workflows/whatif.yml]
 
 permissions:
-  contents: read
   actions: read
 
 jobs:
   whatif:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: senith02/Artifact/Research_Artifact/code/github-action@85e43ea07ee6f02fba5d957d5b6610adc392c29b
         with:
-          repository: senith02/Artifact
-          ref: 0800bd410f4aaabd607d14718716f50726696c6d
-          path: advisor-src
-          persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.11"
-      - name: Install the advisor's pinned runtime packages
-        run: >-
-          python -m pip install --disable-pip-version-check --no-deps --only-binary=:all:
-          -r advisor-src/Research_Artifact/code/github-action/requirements.action.txt
-      - name: Repo What-If Report
-        working-directory: advisor-src/Research_Artifact/code
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          WHATIF_REPO: ${{ github.repository }}
-          WHATIF_WORKFLOW: ${{ inputs.workflow || 'ci.yml' }}
-          WHATIF_OUT: ${{ runner.temp }}/whatif
-        run: >-
-          python -m advisor whatif --repo "$WHATIF_REPO" --workflow "$WHATIF_WORKFLOW" --fetch
-          --snapshot "$WHATIF_OUT/snapshot.json" --out "$WHATIF_OUT/report"
-      - name: Show the report in the run summary
-        env:
-          REPORT: ${{ runner.temp }}/whatif/report/report.md
-        run: cat "$REPORT" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: carbon-whatif-report
-          path: ${{ runner.temp }}/whatif/report/
+          mode: whatif
+          workflow: ${{ inputs.workflow }}

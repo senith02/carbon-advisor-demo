@@ -1,29 +1,23 @@
 # Shows that the advisor refuses pull_request_target (research DL-033 R3-C7).
 #
 # pull_request_target runs with the base repository's context, so it is a
-# classic privilege-escalation path. This workflow checks out only the BASE
-# branch's .github folder (never the PR's code), holds read-only permissions,
-# and runs the advisor, which answers RUN NOW (fail-safe: untrusted_event)
-# without making any API call.
+# classic privilege-escalation path. This workflow checks out nothing, holds
+# read-only permissions, and runs the advisor, which answers RUN NOW
+# (fail-safe: untrusted_event) without making any API call.
 name: pr-target-probe
 
 on:
   pull_request_target:
 
 permissions:
-  contents: read
   actions: read
 
 jobs:
   advisor:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          sparse-checkout: .github
-          persist-credentials: false
       - id: advisor
-        uses: senith02/Artifact/Research_Artifact/code/github-action@7c19b9c319d807135d10f38ddf7df8c3f259bc3e
+        uses: senith02/Artifact/Research_Artifact/code/github-action@85e43ea07ee6f02fba5d957d5b6610adc392c29b
         with:
           compute-region: GB
           scenario: gb-hypothetical

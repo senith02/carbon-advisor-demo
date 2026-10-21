@@ -1,0 +1,24 @@
+# Re-dispatch of deferred ci.yml runs (research P4-T4; DL-033 R3-C10; DL-038 §6).
+#
+# Hourly, it dispatches each open carbon-deferral issue that is due, then comments
+# and closes it. A failed dispatch stays open for the next hour, and closing an
+# issue by hand cancels the deferral. GitHub may delay scheduled runs under load, and
+# disables them in a public repository after 60 days without activity.
+name: carbon-dispatch
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  issues: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: senith02/Artifact/Research_Artifact/code/github-action@85e43ea07ee6f02fba5d957d5b6610adc392c29b
+        with:
+          mode: dispatch

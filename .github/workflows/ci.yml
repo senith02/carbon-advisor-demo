@@ -1,56 +1,55 @@
-# CI for the carbon-advisor demo (research P4-T2; DL-033 R3-K; DL-036).
+# CI for the carbon-advisor demo (research P4-T4; DL-038).
 #
-# Two advisory jobs run beside the build and only publish a recommendation;
-# neither can block, cancel or fail it.
-#   - advisor-real:        the real location — a GitHub-hosted runner, declared
-#                          GITHUB-HOSTED (not GB) -> RUN NOW (fail-safe).
-#   - advisor-gb-scenario: labelled SCENARIO — what the advisor would recommend
-#                          if this build ran on GB compute.
+# ONE advisory job, no config file, no checkout:
+#   - the real answer: this GitHub-hosted runner is declared GITHUB-HOSTED (not GB),
+#     so the advisor answers RUN NOW (fail-safe: region_not_gb);
+#   - show-gb-scenario adds, in the same summary, what it would recommend on GB
+#     compute, labelled SCENARIO;
+#   - redispatch: scenario-demo records that SCENARIO deferral as a carbon-deferral
+#     issue, so this demo can show the full cycle. The build is then skipped, and
+#     carbon-dispatch.yml re-runs it at the recommended hour. Demo repositories only.
 # The build runs a SYNTHETIC ~9-minute workload (scripts/synthetic_workload.py).
 name: ci
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      carbon_redispatch_sha:
+        description: Set by the carbon advisor's dispatcher; leave empty for a manual run
+        required: false
+        default: ""
 
 permissions:
   contents: read
   actions: read
 
 jobs:
-  advisor-real:
-    name: advisor (real location, GitHub-hosted)
+  carbon-advisor:
     runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      issues: write
+    outputs:
+      deferred: ${{ steps.advisor.outputs.deferred }}
+      build_sha: ${{ steps.advisor.outputs.build_sha }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          sparse-checkout: .github
-          persist-credentials: false
       - id: advisor
-        uses: senith02/Artifact/Research_Artifact/code/github-action@7c19b9c319d807135d10f38ddf7df8c3f259bc3e
+        uses: senith02/Artifact/Research_Artifact/code/github-action@85e43ea07ee6f02fba5d957d5b6610adc392c29b
         with:
           compute-region: GITHUB-HOSTED
-          config: .github/carbon-advisor.hosted.yml
-
-  advisor-gb-scenario:
-    name: advisor (GB scenario)
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          sparse-checkout: .github
-          persist-credentials: false
-      - id: advisor
-        uses: senith02/Artifact/Research_Artifact/code/github-action@7c19b9c319d807135d10f38ddf7df8c3f259bc3e
-        with:
-          compute-region: GB
-          scenario: gb-hypothetical
+          show-gb-scenario: true
+          redispatch: scenario-demo
 
   build:
+    needs: carbon-advisor
+    if: ${{ !cancelled() && needs.carbon-advisor.outputs.deferred != 'true' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.carbon-advisor.outputs.build_sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
