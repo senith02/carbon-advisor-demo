@@ -21,7 +21,7 @@ jobs:
   whatif:
     runs-on: ubuntu-24.04
     steps:
-      - uses: senith02/Artifact/Research_Artifact/code/github-action@3ce965086a889e0b35d74c77f0903512f1e60bbe
+      - uses: senith02/Artifact/Research_Artifact/code/github-action@74d6132fde6edd0201cf01959ec0673c09b133fb
         with:
           mode: whatif
           workflow: ${{ inputs.workflow }}
