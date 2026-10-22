@@ -36,7 +36,7 @@ jobs:
       build_sha: ${{ steps.advisor.outputs.build_sha }}
     steps:
       - id: advisor
-        uses: senith02/Artifact/Research_Artifact/code/github-action@85e43ea07ee6f02fba5d957d5b6610adc392c29b
+        uses: senith02/Artifact/Research_Artifact/code/github-action@3ce965086a889e0b35d74c77f0903512f1e60bbe
         with:
           compute-region: GITHUB-HOSTED
           show-gb-scenario: true
