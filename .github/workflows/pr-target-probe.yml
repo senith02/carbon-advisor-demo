@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - id: advisor
-        uses: senith02/Artifact/Research_Artifact/code/github-action@85e43ea07ee6f02fba5d957d5b6610adc392c29b
+        uses: senith02/Artifact/Research_Artifact/code/github-action@74d6132fde6edd0201cf01959ec0673c09b133fb
         with:
           compute-region: GB
           scenario: gb-hypothetical

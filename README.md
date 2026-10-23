@@ -25,9 +25,11 @@ The full request, response and audit record are uploaded as a workflow artifact.
 whole cycle can be shown on a GitHub-hosted runner:
 1. When the GB scenario says DEFER, the advisor opens an issue labelled **`carbon-deferral`**, titled
    **[SCENARIO]**, and the build is skipped.
-2. [`carbon-dispatch.yml`](.github/workflows/carbon-dispatch.yml) runs hourly. Once the recommended
-   hour has passed, it re-dispatches `ci.yml` at the deferred commit, then comments on and closes the
-   issue.
+2. At the recommended hour, a small service on the author's server
+   ([`carbon_tick.py`](https://github.com/senith02/Artifact/tree/main/Research_Artifact/code/github-action/examples/vps-trigger))
+   starts [`carbon-dispatch.yml`](.github/workflows/carbon-dispatch.yml). It re-dispatches `ci.yml` at
+   the deferred commit, then comments on and closes the issue. GitHub's own schedule is too unreliable
+   to be on time, so it is kept only as a 6-hourly backup.
 3. The re-dispatched run is RUN NOW and builds that commit.
 
 Close the issue to cancel a deferral. `scenario-demo` exists for demonstration repositories only; a
@@ -54,9 +56,9 @@ Fork this repository, enable workflows in the fork's **Actions** tab, then:
    `git push -u origin feature/try-defer`. The GB scenario section of the advisor's Summary shows
    DEFER RECOMMENDED with a start time, unless the current hour is already the cleanest in the next
    24 h. A **[SCENARIO] Carbon deferral** issue appears, and the build is skipped.
-4. **Re-dispatch:** after the recommended hour, **carbon-dispatch** re-runs the build and closes the
-   issue. To skip the wait, run **Actions** → **carbon-dispatch** → **Run workflow** once the hour has
-   passed.
+4. **Re-dispatch:** in a fork there is no server running `carbon_tick.py`, so after the recommended
+   hour run **Actions** → **carbon-dispatch** → **Run workflow** yourself, or set up the trigger from
+   the guide above. It re-runs the build and closes the issue.
 5. **What-If report:** **Actions** → **carbon-whatif** → **Run workflow**.
 
 The full walkthrough is the

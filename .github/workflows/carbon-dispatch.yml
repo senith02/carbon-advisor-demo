@@ -1,15 +1,25 @@
-# Re-dispatch of deferred ci.yml runs (research P4-T4; DL-033 R3-C10; DL-038 §6).
+# Re-dispatch of deferred ci.yml runs (research P4-T4; DL-033 R3-C10; DL-038 §6, §11).
 #
-# Hourly, it dispatches each open carbon-deferral issue that is due, then comments
-# and closes it. A failed dispatch stays open for the next hour, and closing an
-# issue by hand cancels the deferral. GitHub may delay scheduled runs under load, and
-# disables them in a public repository after 60 days without activity.
+# It dispatches each open carbon-deferral issue whose start time has passed, then
+# comments on it and closes it. A failed dispatch stays open for the next pass, and
+# closing an issue by hand cancels the deferral.
+#
+# What starts it:
+#   - workflow_dispatch: the punctual path. The author's server runs carbon_tick.py
+#     (Research_Artifact/code/github-action/examples/vps-trigger/), which sleeps until
+#     the exact start time and then starts this workflow.
+#   - schedule: a 6-hourly BACKUP only. GitHub's schedule is best-effort (on
+#     2026-10-21/22 an hourly schedule ran 3 times in 12 hours).
 name: carbon-dispatch
 
 on:
-  schedule:
-    - cron: "17 * * * *"
   workflow_dispatch:
+  schedule:
+    - cron: "23 */6 * * *"
+
+concurrency:
+  group: carbon-dispatch
+  cancel-in-progress: false
 
 permissions:
   actions: write
@@ -19,6 +29,6 @@ jobs:
   dispatch:
     runs-on: ubuntu-24.04
     steps:
-      - uses: senith02/Artifact/Research_Artifact/code/github-action@85e43ea07ee6f02fba5d957d5b6610adc392c29b
+      - uses: senith02/Artifact/Research_Artifact/code/github-action@74d6132fde6edd0201cf01959ec0673c09b133fb
         with:
           mode: dispatch
