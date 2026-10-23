@@ -42,6 +42,7 @@ jobs:
           show-gb-scenario: true
           redispatch: scenario-demo
           whatif-report: true
+          live-intensity: false   # the decision uses the evaluated typical-week profile; live values are not shown
 
   build:
     needs: carbon-advisor
